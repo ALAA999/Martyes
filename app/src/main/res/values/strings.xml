@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Martyes</string>
+    <string name="title_home">Home</string>
+    <string name="title_search">Search</string>
+    <string name="title_statistics">Statistics</string>
+    <string name="title_profile">Profile</string>
+    <string name="cancel">Cancel</string>
+    <string name="field_required">Field required</string>
+</resources>
