@@ -13,26 +13,22 @@ import com.allosh.martyes.location.MyLocationManager
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import android.util.Log
 
 
 import android.content.res.Resources.NotFoundException
 import com.allosh.martyes.R
-
-import com.google.android.gms.maps.model.MapStyleOptions
-
-
+import com.allosh.martyes.ui.dialog.MartyrsDialog
+import com.google.android.gms.maps.model.*
 
 
-class HomeFragment : Fragment(), MyLocationManager.Listener, OnMapReadyCallback {
+class HomeFragment : Fragment(), MyLocationManager.Listener, OnMapReadyCallback,
+    GoogleMap.OnMarkerClickListener {
 
     private lateinit var binding: FragmentHomeBinding
     private lateinit var googleMap: GoogleMap
     private lateinit var myLocationManager: MyLocationManager
+    private lateinit var martyrsDialog: MartyrsDialog
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +41,7 @@ class HomeFragment : Fragment(), MyLocationManager.Listener, OnMapReadyCallback 
 
         binding.mapView.onCreate(savedInstanceState)
         binding.mapView.getMapAsync(this)
+        martyrsDialog = MartyrsDialog(requireActivity())
 
         return binding.root
     }
@@ -52,6 +49,7 @@ class HomeFragment : Fragment(), MyLocationManager.Listener, OnMapReadyCallback 
 
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
+        this.googleMap.setOnMarkerClickListener(this)
         try {
             // Customise the styling of the base map using a JSON object defined
             // in a raw resource file.
@@ -72,7 +70,8 @@ class HomeFragment : Fragment(), MyLocationManager.Listener, OnMapReadyCallback 
         googleMap.clear()
         googleMap.addMarker(
             MarkerOptions().position(latLng)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
+                .anchor(0.5f, 0.5f)
         )
         val cameraPosition = CameraPosition.Builder()
             .target(latLng)
@@ -81,6 +80,14 @@ class HomeFragment : Fragment(), MyLocationManager.Listener, OnMapReadyCallback 
             .tilt(0f)
             .build()
         googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
+        googleMap.setOnCameraIdleListener {
+            Log.e(
+                "currentLat", "" + googleMap.projection.visibleRegion.latLngBounds.center
+            )
+            Log.e(
+                "currentZoom", "" + googleMap.cameraPosition.zoom
+            )
+        }
     }
 
     override fun onServicesOrPermissionChoice() {
@@ -144,5 +151,10 @@ class HomeFragment : Fragment(), MyLocationManager.Listener, OnMapReadyCallback 
     override fun onDestroy() {
         super.onDestroy()
         binding.mapView.onDestroy()
+    }
+
+    override fun onMarkerClick(p0: Marker): Boolean {
+        martyrsDialog.show()
+        return false
     }
 }
